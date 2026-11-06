@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Restora is a simple, private sleep tracker and journal.">
+  <meta name="theme-color" content="#f7f6f2">
+  <title>Restora — Sleep, simply understood</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="js/storage.js"></script>
+  <script defer src="js/sleep-calculator.js"></script>
+  <script defer src="js/analytics.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="Restora home">
+        <span class="brand-mark">R</span>
+        <span>Restora</span>
+      </a>
+      <p class="side-caption">YOUR SPACE</p>
+      <nav class="nav-list" aria-label="Main navigation">
+        <button class="nav-link active" data-view="overview"><span>⌂</span> Overview</button>
+        <button class="nav-link" data-view="calendar"><span>▦</span> Sleep calendar</button>
+        <button class="nav-link" data-view="journal"><span>▤</span> Sleep journal</button>
+        <button class="nav-link" data-view="planner"><span>◷</span> Bedtime planner</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="privacy-note">
+          <span class="privacy-dot"></span>
+          <div><strong>Your data stays here</strong><small>Saved in this browser</small></div>
+        </div>
+        <button class="nav-link" id="themeToggle"><span>◐</span> Switch theme</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobileMenu" aria-label="Open navigation">☰</button>
+        <div>
+          <p class="eyebrow" id="todayLabel">YOUR SLEEP OVERVIEW</p>
+          <h1 id="pageTitle">Good to see you.</h1>
+        </div>
+        <div class="top-actions">
+          <button class="button button-quiet" id="exportCsv">Export CSV</button>
+          <button class="button button-primary" id="quickAdd">＋ Log sleep</button>
+        </div>
+      </header>
+
+      <section class="view active" id="view-overview">
+        <div class="welcome-panel">
+          <div>
+            <p class="eyebrow">A LITTLE MORE REST, ONE DAY AT A TIME</p>
+            <h2>Understand your sleep.<br><em>Find your rhythm.</em></h2>
+            <p class="welcome-copy">A calm place to track your nights, notice patterns and build a routine that works for you.</p>
+            <button class="button button-dark" id="welcomeLog">Add last night's sleep <span>→</span></button>
+          </div>
+          <div class="moon-art" aria-hidden="true">
+            <div class="moon"></div><span class="star star-one">✦</span><span class="star star-two">·</span><span class="star star-three">✧</span>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <div><p class="eyebrow">YOUR NUMBERS</p><h2>At a glance</h2></div>
+          <span class="muted small" id="rangeLabel">Based on your recent entries</span>
+        </div>
+        <div class="stats-grid">
+          <article class="stat-card"><span class="stat-icon lavender">◷</span><p>Average sleep</p><strong id="avgSleep">—</strong><small>per logged night</small></article>
+          <article class="stat-card"><span class="stat-icon peach">↗</span><p>Sleep goal</p><strong id="goalProgress">—</strong><small id="goalCaption">Set a daily goal</small></article>
+          <article class="stat-card"><span class="stat-icon mint">▦</span><p>Nights tracked</p><strong id="trackedNights">0</strong><small>in the last 7 days</small></article>
+          <article class="stat-card"><span class="stat-icon blue">≈</span><p>Estimated shortfall</p><strong id="sleepDebt">—</strong><small>against your chosen goal</small></article>
+        </div>
+
+        <div class="content-grid">
+          <section class="panel chart-panel">
+            <div class="panel-heading"><div><p class="eyebrow">RECENT PATTERN</p><h2>Sleep over the week</h2></div>
+              <select id="chartRange" class="small-select" aria-label="Chart date range"><option value="7">Last 7 days</option><option value="30">Last 30 days</option></select>
+            </div>
+            <div class="chart-wrap"><canvas id="sleepChart" aria-label="Sleep duration chart"></canvas><p class="empty-chart" id="chartEmpty">Log a few nights to see your sleep pattern here.</p></div>
+            <div class="chart-legend"><span><i class="legend-dot"></i> Hours slept</span><span><i class="legend-line"></i> Your goal</span></div>
+          </section>
+          <section class="panel insight-panel">
+            <p class="eyebrow">A NOTE FROM YOUR LOG</p><h2>Small observations</h2>
+            <div id="insightContent" class="insight-content"><div class="insight-symbol">✧</div><p>Your sleep insights will appear after you add a few entries.</p></div>
+            <div class="soft-note"><strong>Keep it in perspective</strong><p>These observations are based on your own entries, not a medical assessment.</p></div>
+          </section>
+        </div>
+
+        <section class="panel recent-panel">
+          <div class="panel-heading"><div><p class="eyebrow">YOUR HISTORY</p><h2>Recent nights</h2></div><button class="text-button" data-go="calendar">View all entries →</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Date</th><th>Bedtime</th><th>Wake time</th><th>Duration</th><th>How rested?</th><th></th></tr></thead><tbody id="recentTable"><tr><td colspan="6" class="empty-cell">No sleep entries yet.</td></tr></tbody></table></div>
+        </section>
+      </section>
+
+      <section class="view" id="view-calendar">
+        <div class="section-heading"><div><p class="eyebrow">YOUR HISTORY</p><h2>Sleep calendar</h2><p class="muted">Choose a day to review or update your entry.</p></div>
+          <div class="calendar-controls"><button class="icon-button" id="prevMonth" aria-label="Previous month">‹</button><strong id="monthTitle"></strong><button class="icon-button" id="nextMonth" aria-label="Next month">›</button></div>
+        </div>
+        <section class="panel calendar-panel">
+          <div class="calendar-grid calendar-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+          <div class="calendar-grid" id="calendarDays"></div>
+          <div class="calendar-legend"><span><i class="legend-dot"></i> Entry logged</span><span><i class="legend-dot legend-dot-today"></i> Today</span></div>
+        </section>
+        <section class="panel selected-day-panel" id="selectedDayPanel"><p class="eyebrow">SELECTED DAY</p><h2 id="selectedDayTitle">Choose a date</h2><p class="muted" id="selectedDayText">Your sleep details will appear here.</p></section>
+      </section>
+
+      <section class="view" id="view-journal">
+        <div class="section-heading"><div><p class="eyebrow">NOTICE THE LITTLE THINGS</p><h2>Sleep journal</h2><p class="muted">Add a note about your day and how you felt after waking.</p></div></div>
+        <div class="content-grid journal-grid">
+          <section class="panel">
+            <p class="eyebrow">DAILY NOTE</p><h2>How was your night?</h2>
+            <form id="journalForm">
+              <label for="journalDate">Date</label><input id="journalDate" type="date" required>
+              <label for="restedFeeling">How rested did you feel?</label>
+              <select id="restedFeeling"><option value="Very rested">Very rested</option><option value="Okay">Okay</option><option value="A little tired">A little tired</option><option value="Very tired">Very tired</option></select>
+              <label for="sleepFactors">What might have affected your sleep?</label>
+              <select id="sleepFactors"><option value="No specific factor">No specific factor</option><option value="Late screen use">Late screen use</option><option value="Caffeine later in the day">Caffeine later in the day</option><option value="Exercise">Exercise</option><option value="Study or work">Study or work</option><option value="Noise or environment">Noise or environment</option><option value="Other">Other</option></select>
+              <label for="journalNote">Your note <span class="muted">(optional)</span></label><textarea id="journalNote" rows="5" maxlength="500" placeholder="Anything you noticed about last night..."></textarea>
+              <button class="button button-primary full-width" type="submit">Save journal note</button>
+            </form>
+          </section>
+          <section class="panel">
+            <p class="eyebrow">PAST NOTES</p><h2>Your journal</h2>
+            <div id="journalList" class="journal-list"><p class="muted">Your saved notes will show up here.</p></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-planner">
+        <div class="section-heading"><div><p class="eyebrow">PLAN A ROUTINE</p><h2>Bedtime planner</h2><p class="muted">Work backwards from your wake-up time and your sleep goal.</p></div></div>
+        <div class="content-grid planner-grid">
+          <section class="panel">
+            <p class="eyebrow">YOUR PREFERENCES</p><h2>Set your sleep goal</h2>
+            <form id="goalForm">
+              <label for="sleepGoal">Target sleep duration</label><select id="sleepGoal"><option value="7">7 hours</option><option value="7.5">7 hours 30 minutes</option><option value="8" selected>8 hours</option><option value="8.5">8 hours 30 minutes</option><option value="9">9 hours</option></select>
+              <label for="targetWake">Usual wake-up time</label><input type="time" id="targetWake" value="07:00" required>
+              <label for="fallAsleep">Time to fall asleep</label><select id="fallAsleep"><option value="10">10 minutes</option><option value="15" selected>15 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option></select>
+              <button class="button button-primary full-width" type="submit">Update my plan</button>
+            </form>
+          </section>
+          <section class="panel">
+            <p class="eyebrow">YOUR BEDTIME OPTIONS</p><h2>Suggested times</h2>
+            <p class="muted small">These are planning estimates based on your selected sleep duration and time to fall asleep. They are not predictions of sleep stages.</p>
+            <div id="bedtimeResults" class="bedtime-results"></div>
+            <div class="soft-note"><strong>Consistency matters</strong><p>A reasonably regular sleep and wake schedule can make it easier to build a routine. Adjust your plan to fit your needs.</p></div>
+          </section>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>restora <span class="footer-dot">·</span> Sleep, simply understood.</span>
+        <div class="footer-actions"><button class="text-button" id="exportJson">Backup data</button><label class="text-button import-label" for="importJson">Restore backup</label><input id="importJson" type="file" accept="application/json,.json" hidden><button class="text-button danger-text" id="resetData">Reset data</button></div>
+      </footer>
+    </main>
+  </div>
+
+  <dialog id="sleepDialog" class="modal">
+    <form id="sleepForm" method="dialog">
+      <div class="modal-heading"><div><p class="eyebrow">SLEEP LOG</p><h2 id="sleepDialogTitle">Add a night</h2></div><button type="button" class="icon-button" id="closeDialog" aria-label="Close">×</button></div>
+      <input type="hidden" id="entryId">
+      <label for="sleepDate">Date you woke up</label><input type="date" id="sleepDate" required>
+      <div class="form-two"><div><label for="bedTime">Bedtime</label><input type="time" id="bedTime" value="23:00" required></div><div><label for="wakeTime">Wake-up time</label><input type="time" id="wakeTime" value="07:00" required></div></div>
+      <label for="rested">How rested did you feel?</label><select id="rested"><option value="Very rested">Very rested</option><option value="Okay" selected>Okay</option><option value="A little tired">A little tired</option><option value="Very tired">Very tired</option></select>
+      <label for="factor">Anything that affected your sleep?</label><select id="factor"><option value="No specific factor">No specific factor</option><option value="Late screen use">Late screen use</option><option value="Caffeine later in the day">Caffeine later in the day</option><option value="Exercise">Exercise</option><option value="Study or work">Study or work</option><option value="Noise or environment">Noise or environment</option><option value="Other">Other</option></select>
+      <label for="entryNote">Note <span class="muted">(optional)</span></label><textarea id="entryNote" rows="3" maxlength="500" placeholder="Add a short note..."></textarea>
+      <p class="form-error" id="formError" role="alert"></p>
+      <div class="modal-actions"><button type="button" class="button button-quiet" id="cancelDialog">Cancel</button><button type="submit" class="button button-primary">Save entry</button></div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
